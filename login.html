@@ -1,3 +1,12 @@
+<!-- تم صنع الكود بواسطة 
+محمود ايمن 
+التلفون 
+01029046651
+البريد 
+gqikdubrjntorldfieo36@gmail.com-->
+
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -351,19 +360,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
-  <script type="module">
+  <script>
     // ========== تهيئة Firebase ==========
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
-    import { getAuth, 
-             signInWithEmailAndPassword, 
-             createUserWithEmailAndPassword, 
-             sendPasswordResetEmail, 
-             sendEmailVerification,
-             onAuthStateChanged,
-             signOut } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js';
-    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
-
-    // قم بإنشاء ملف firebase-config.js منفصل وأضفه إلى .gitignore
     const firebaseConfig = {
       apiKey: "AIzaSyAowg6qNEJ7L6RkorxrMfUO-tIGq_GpEig",
       authDomain: "data-mahmoud-osama.firebaseapp.com",
@@ -376,9 +374,9 @@
     };
 
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
 
     // ========== العناصر الرئيسية ==========
     const container = document.getElementById('container');
@@ -415,9 +413,8 @@
       const timestamp = new Date().toISOString();
       console.log(`Security Event: ${eventType} | User: ${userEmail || 'guest'} | Time: ${timestamp}`);
       
-      // يمكنك إرسال هذه البيانات إلى سيرفر للتسجيل
       if (userEmail) {
-        set(ref(database, 'security_logs/' + timestamp.replace(/[:.]/g, '-')), {
+        database.ref('security_logs/' + timestamp.replace(/[:.]/g, '-')).set({
           event: eventType,
           user: userEmail,
           timestamp: timestamp,
@@ -457,7 +454,6 @@
     }
 
     // ========== المصادقة ==========
-    // تسجيل الدخول
     async function login() {
       loginErrorDiv.textContent = '';
       const email = sanitizeInput(document.getElementById('email').value);
@@ -474,10 +470,10 @@
       }
 
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
         
         if (!userCredential.user.emailVerified) {
-          await signOut(auth);
+          await auth.signOut();
           loginErrorDiv.textContent = 'يجب التحقق من البريد الإلكتروني أولاً';
           logSecurityEvent('LOGIN_ATTEMPT_UNVERIFIED', email);
           return;
@@ -490,7 +486,6 @@
       }
     }
 
-    // إنشاء حساب
     async function signUp() {
       signupErrorDiv.textContent = '';
       const email = sanitizeInput(document.getElementById('signup-email').value);
@@ -523,8 +518,8 @@
       }
 
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(userCredential.user);
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await userCredential.user.sendEmailVerification();
         
         alert('تم إرسال رابط التحقق إلى بريدك الإلكتروني. يرجى التحقق من بريدك لإكمال التسجيل.');
         container.classList.remove('active');
@@ -536,7 +531,6 @@
       }
     }
 
-    // إعادة تعيين كلمة المرور
     async function resetPassword() {
       resetErrorDiv.textContent = '';
       resetSuccessDiv.textContent = '';
@@ -553,7 +547,7 @@
       }
 
       try {
-        await sendPasswordResetEmail(auth, email);
+        await firebase.auth().sendPasswordResetEmail(email);
         resetSuccessDiv.textContent = 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني';
         resetForm.reset();
         logSecurityEvent('PASSWORD_RESET_REQUEST', email);
@@ -578,6 +572,20 @@
       console.error('Auth Error:', error);
     }
 
+    // ========== جعل الدوال متاحة عالمياً ==========
+    window.login = login;
+    window.resetPassword = resetPassword;
+    window.signUp = signUp;
+    window.showResetForm = function() {
+      showForm('reset');
+      clearErrorMessages();
+    };
+    window.showLoginForm = function() {
+      container.classList.remove('active');
+      showForm('login');
+      clearErrorMessages();
+    };
+
     // ========== إدارة أحداث النماذج ==========
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -595,27 +603,15 @@
     });
 
     // ========== التحقق من حالة المصادقة ==========
-    onAuthStateChanged(auth, (user) => {
+    firebase.auth().onAuthStateChanged((user) => {
       if (user && user.emailVerified) {
         logSecurityEvent('AUTO_REDIRECT_AUTHENTICATED', user.email);
         window.location.href = 'index.html';
       } else if (user) {
         logSecurityEvent('AUTO_REDIRECT_UNVERIFIED', user.email);
-        signOut(auth);
+        auth.signOut();
       }
     });
-
-    // ========== دوال التبديل للنماذج (للاستدعاء من HTML) ==========
-    window.showResetForm = function() {
-      showForm('reset');
-      clearErrorMessages();
-    }
-
-    window.showLoginForm = function() {
-      container.classList.remove('active');
-      showForm('login');
-      clearErrorMessages();
-    }
   </script>
 </body>
 </html>
