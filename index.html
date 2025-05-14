@@ -201,10 +201,15 @@
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="customers-list">
-                        </tbody>
-                </table>
-            </section>
+                  <!-- في قسم العملاء -->
+<table id="customers-table">
+    <tbody id="customers-list">
+        <!-- سيتم إضافة الصفوف ديناميكياً -->
+    </tbody>
+</table>
+
+
+ </section>
 
             <section id="reports">
                 <h2><i class="fas fa-chart-bar"></i> التقارير</h2>
@@ -423,6 +428,22 @@
     </div>
 
  <script type="module" src="script.js"></script>
+
+
+
+<!-- في JavaScript الداخلي للصفحة -->
+<script>
+// تأكد من تحميل DOM أولاً
+document.addEventListener('DOMContentLoaded', function() {
+    // ربط الأحداث بشكل صحيح
+    document.getElementById('add-customer-btn2').addEventListener('click', function() {
+        window.openCustomerModal();
+    });
+});
+</script>
+           
+
+
 
    </script>
    </body>
